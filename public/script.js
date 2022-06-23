@@ -250,7 +250,7 @@ function defensiveGridEvent(event, i, j) {
 }
 
 
-changeScreen("place-boats-container") //AAAA
+//changeScreen("place-boats-container") //AAAA
 
 
 
