@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <!--meta name="description" content=""/-->
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"/>
+  <title></title>
+  <link rel="stylesheet" type="text/css" href="base.css"/>
+  <!--link href="system/logo.png" rel="shortcut icon" type="imag/x-icon"/-->
+</head>
+<body>
+
+  <div id="starting-page-container" class="center">
+    <div class="title-starting-page">Battaglia Navale</div>
+    <div class="button-container center">
+      <div id="create-game">Crea una stanza</div>
+      <div id="join-game">Partecipa a una stanza</div>
+    </div>
+    <div id="players-starting-page">Giocatori online ora: </div>
+  </div>
+
+  <div id="create-game-container" class="center">
+    <div class="button-container center">
+      <div id="create-game-back">Indietro</div>
+      <input id="create-game-code" type="text" disabled>
+      <div id="create-game-wait">Invia il codice a un tuo amico e attendi che entri nella stanza</div>
+    </div>
+  </div>
+
+  <div id="join-game-container" class="center">
+    <div class="button-container center">
+      <div id="join-game-back">Indietro</div>
+      <input id="join-game-code" type="text">
+      <div id="join-game-join">Partecipa</div>
+    </div>
+    <div style="display: none;" id="join-game-error"></div>
+  </div>
+
+  <div id="place-boats-container" class="center">
+    <div id="grid-holder">
+      <div id="grid-offensive">
+        
+        <div id="circle0" class="radar-circle"></div>
+        <div id="circle1" class="radar-circle"></div>
+        <div id="circle2" class="radar-circle"></div>
+
+        <div class="border-grid-horizontal"></div><div class="border-grid-horizontal" id="bgh1"></div><div class="border-grid-horizontal" id="bgh2"></div><div class="border-grid-horizontal" id="bgh3"></div><div class="border-grid-horizontal" id="bgh4"></div><div class="border-grid-horizontal" id="bgh5"></div><div class="border-grid-horizontal" id="bgh6"></div><div class="border-grid-horizontal" id="bgh7"></div><div class="border-grid-horizontal" id="bgh8"></div>
+        <div class="border-grid-vertical"></div><div class="border-grid-vertical" id="bgv1"></div><div class="border-grid-vertical" id="bgv2"></div><div class="border-grid-vertical" id="bgv3"></div><div class="border-grid-vertical" id="bgv4"></div><div class="border-grid-vertical" id="bgv5"></div><div class="border-grid-vertical" id="bgv6"></div><div class="border-grid-vertical" id="bgv7"></div><div class="border-grid-vertical" id="bgv8"></div>
+
+        <div id="radar-animation-holder" class="center">
+          <div id="radar-animation">
+            <div id="radar-line"></div>
+          </div>
+        </div>
+
+        <div class="grid-row off-row">
+          <div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div>
+        </div>
+        <div class="grid-row off-row">
+          <div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div>
+        </div>
+        <div class="grid-row off-row">
+          <div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div>
+        </div>
+        <div class="grid-row off-row">
+          <div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div>
+        </div>
+        <div class="grid-row off-row">
+          <div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div>
+        </div>
+        <div class="grid-row off-row">
+          <div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div>
+        </div>
+        <div class="grid-row off-row">
+          <div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div>
+        </div>
+        <div class="grid-row off-row">
+          <div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div><div class="grid-box off"></div>
+        </div>
+      </div>
+
+      <div id="grid-spacer"></div>
+  
+      <div id="grid-defensive">
+
+        <div class="border-grid-horizontal-defensive"></div><div class="border-grid-horizontal-defensive" id="bgh1"></div><div class="border-grid-horizontal-defensive" id="bgh2"></div><div class="border-grid-horizontal-defensive" id="bgh3"></div><div class="border-grid-horizontal-defensive" id="bgh4"></div><div class="border-grid-horizontal-defensive" id="bgh5"></div><div class="border-grid-horizontal-defensive" id="bgh6"></div><div class="border-grid-horizontal-defensive" id="bgh7"></div><div class="border-grid-horizontal-defensive" id="bgh8"></div>
+        <div class="border-grid-vertical-defensive"></div><div class="border-grid-vertical-defensive" id="bgv1"></div><div class="border-grid-vertical-defensive" id="bgv2"></div><div class="border-grid-vertical-defensive" id="bgv3"></div><div class="border-grid-vertical-defensive" id="bgv4"></div><div class="border-grid-vertical-defensive" id="bgv5"></div><div class="border-grid-vertical-defensive" id="bgv6"></div><div class="border-grid-vertical-defensive" id="bgv7"></div><div class="border-grid-vertical-defensive" id="bgv8"></div>
+
+
+        <div class="grid-row def-row">
+          <div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div>
+        </div>
+        <div class="grid-row def-row">
+          <div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div>
+        </div>
+        <div class="grid-row def-row">
+          <div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div>
+        </div>
+        <div class="grid-row def-row">
+          <div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div>
+        </div>
+        <div class="grid-row def-row">
+          <div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div>
+        </div>
+        <div class="grid-row def-row">
+          <div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div>
+        </div>
+        <div class="grid-row def-row">
+          <div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div>
+        </div>
+        <div class="grid-row def-row">
+          <div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div><div class="grid-box def"></div>
+        </div>
+      </div>
+    </div>
+    
+
+    <div id="right-menu-container" class="center">
+      <div id="boats-container" class="center">
+        <div class="boat-holder center">
+          <div class="boat" id="boat0" draggable="true"></div>
+        </div>
+        <div class="boat-holder center">
+          <div class="boat" id="boat1" draggable="true"></div>
+        </div>
+        <div class="boat-holder center">
+          <div class="boat" id="boat2" draggable="true"></div>
+        </div>
+        <div class="boat-holder center">
+          <div class="boat" id="boat3" draggable="true"></div>
+        </div>
+        <div class="boat-holder center">
+          <div class="boat" id="boat4" draggable="true"></div>
+        </div>
+      </div>
+
+      <div id="chat" class="center">
+        
+      </div>
+
+      <div id="comands-container" class="center">
+        <div id="boats-container-quit">Abbandona la stanza</div>
+        <div id="boats-container-clear">Pulisci tutto</div>
+        <div id="boats-container-done">Fatto</div>
+      </div>
+    </div>
+    
+  </div>
+
+  <div id="place-boats-waiting-container" class="center">
+    <div id="place-boats-waiting-text">Aspetta che il tuo avversario sia pronto</div>
+    <div id="place-boats-waiting-back">Indietro</div>
+  </div>
+
+  <div id="quit-warn-container" class="center">
+    <div id="quit-warn-text">Il tuo avversario ha abbandonato la partita</div>
+    <div id="quit-warn-back">Torna alla home</div>
+  </div>
+
+
+
+  <div id="overlay"></div>
+  
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+  <noscript><div class="noscript">Attiva JavaScript dalle impostazioni del tuo browser<div id="noscript-space"></div>Enable JavaScript in your browser settings</div></noscript>
+</body>
+</html>
