@@ -250,7 +250,7 @@ function defensiveGridEvent(event, i, j) {
 }
 
 
-//changeScreen("place-boats-container") //AAAA
+changeScreen("place-boats-container") //AAAA
 
 
 
@@ -279,20 +279,33 @@ for (let i = 0; i < 8; i++) {
 for (let i = 0; i < _boats.length; i++) {
     boats.push({div: _boats[i], length: (i < 2) ? i + 2 : i + 1, vertical: true, position: [], reSaveBoatPosition: {}})
     boats[i].div.addEventListener("click", () => {
-        if (boats[i].vertical)
-            boats[i].div.classList.add('horizontal')
-        else
-            boats[i].div.classList.remove('horizontal')
-
+        
+        if (boats[i].position.length == 0) return //per chiamare questa funzione la barca deve essere posizionata!!!
+        
         boats[i].vertical = !boats[i].vertical
 
-        if (boats[i].position.length != 0) //per chiamare questa funzione la barca deve essere posizionata!!!
+        //console.log(checkIllegality(saveBoatPosition(boats[i].reSaveBoatPosition.attachPos.i, boats[i].reSaveBoatPosition.attachPos.j, i, boats[i].reSaveBoatPosition.centralPos, false), i))
+
+        if (checkIllegality(saveBoatPosition(boats[i].reSaveBoatPosition.attachPos.i, boats[i].reSaveBoatPosition.attachPos.j, i, boats[i].reSaveBoatPosition.centralPos, false), i)) {
+            showCannotTurn(i)
+            boats[i].vertical = !boats[i].vertical
+        } else {
+            if (!boats[i].vertical)
+                boats[i].div.classList.add('horizontal')
+            else
+                boats[i].div.classList.remove('horizontal')
+
             saveBoatPosition(boats[i].reSaveBoatPosition.attachPos.i, boats[i].reSaveBoatPosition.attachPos.j, i, boats[i].reSaveBoatPosition.centralPos)
+        }
     })
     
 }
 
 for (let i = 0; i < boats.length; i++) {
+    // boats[i].div.addEventListener("dragstart", () => console.log("dragstart"))
+    // boats[i].div.addEventListener("dragend", () => {
+    //     console.log("dragend")
+    // })
 
     boats[i].div.addEventListener("dragstart", (e) => {
 
@@ -332,6 +345,10 @@ let illegalPos = false
 //SALVATAGGIO BARCHE
 
 defensiveGrid.forEach((row, i) => row.forEach((box, j) => {
+    // box.addEventListener("dragover", () => console.log("dragover"))
+    // box.addEventListener("dragenter", () => setTimeout(() => console.log("dragenter"), 1))
+    // box.addEventListener("dragleave", () => console.log("dragleave"))
+    // box.addEventListener("drop", () => console.log("drop"))
 
     function dragoverEventListener(e) {
         e.preventDefault()
@@ -340,7 +357,7 @@ defensiveGrid.forEach((row, i) => row.forEach((box, j) => {
 
     box.addEventListener("dragover", dragoverEventListener)
     
-    box.addEventListener("dragenter", (e) => {
+    box.addEventListener("dragenter", (e) => setTimeout(() => {
         e.preventDefault()
 
         over = true
@@ -351,18 +368,15 @@ defensiveGrid.forEach((row, i) => row.forEach((box, j) => {
 
         //console.log(positions)
 
-        for (const position of positions)
-            if (position.i < 0 || position.i > 7 || position.j < 0 || position.j > 7) {
-                //console.warn("illegal position")
-                illegalPos = true
-                break
-            }
+        illegalPos = checkIllegality(positions, indexDivTaken)
+            
         
 
         if (illegalPos)
             box.removeEventListener("dragover", dragoverEventListener)
     
-    })
+    }, 1))
+
 
     box.addEventListener("dragleave", () => {
         over = false
@@ -377,14 +391,41 @@ defensiveGrid.forEach((row, i) => row.forEach((box, j) => {
         saveBoatPosition(centralPosition.i, centralPosition.j, indexDivTaken, centralPosition.centralPos)
     
         divTaken.style.display = "flex"
-
-        console.clear()
-        console.table(boatsGrid)
     
     })
 }))
 
+function checkIllegality(positions, indexDiv) {
+    let illegal = false
 
+    for (const position of positions) {
+        if (position.i < 0 || position.i > 7 || position.j < 0 || position.j > 7) {
+            illegal = true
+            break
+        }
+
+        let cubeOwnBoat = false
+
+        for (const boatsPosition of boats[indexDiv].position)
+            if (boatsPosition.i == position.i && boatsPosition.j == position.j) //PROBLEMA QUI
+                cubeOwnBoat = true
+
+        if (boatsGrid[position.i][position.j] && !cubeOwnBoat) {
+            illegal = true
+            break
+        }
+    }
+
+    //console.log(illegal)
+
+    return illegal
+}
+
+
+function showCannotTurn(boatIndex) {
+    boats[boatIndex].div.classList.add('ticker')
+    setTimeout(() => boats[boatIndex].div.classList.remove('ticker'), 600);
+}
 
 
 function findCentralPosition(i, j) {
@@ -407,8 +448,8 @@ function saveBoatPosition(i, j, boatIndex, centralPos, save = true) {
     let positions = []
 
     if (save) {
-        for (let i = 0; i < boats[boatIndex].position.length; i++)
-            [boats[boatIndex].position[i].i][boats[boatIndex].position[i].j] = false
+        for (let i = 0; i < boats[boatIndex].position.length; i++) 
+            boatsGrid[boats[boatIndex].position[i].i][boats[boatIndex].position[i].j] = false
 
         boats[boatIndex].reSaveBoatPosition = {attachPos: {i, j}, centralPos}
 
@@ -434,6 +475,9 @@ function saveBoatPosition(i, j, boatIndex, centralPos, save = true) {
         boats[boatIndex].position.push(positions[i])
         boatsGrid[positions[i].i][positions[i].j] = true
     }
+
+    //if (save) console.clear()
+    //if (save) console.table(boatsGrid)
     
     return positions
 

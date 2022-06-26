@@ -446,12 +446,29 @@ body {
 
 #boat4 {
     width: 4.5vmin;
-    height: 24vmin;  
+    height: 24vmin;
 }
 
 #boat4.horizontal {
     height: 4.5vmin;
     width: 24vmin;  
+}
+
+
+
+.ticker {
+    animation: ticker 0.05s linear 0s 15 alternate;
+    /*background-color: rgb(255, 0, 0);*/
+}
+
+@keyframes ticker {
+    from {
+        margin-left: 1vmin;
+    }
+
+    to {
+        margin-right: 1vmin;
+    }
 }
 
 
