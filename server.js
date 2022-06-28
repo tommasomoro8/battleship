@@ -1,4 +1,5 @@
 const express = require('express');
+const { setTimeout } = require('timers/promises');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
@@ -11,36 +12,44 @@ let playerNum = 0;
 
 let rooms = []
 
-const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-function makeid(length) {
-    let id;
-    do {
-        id = ""
-        for (let i = 0; i < length; i++)
-            id += characters.charAt(Math.floor(Math.random() * characters.length));
-    } while (rooms.includes(id));
+/*{
+    id: "id della stanza",
+    players: [
+        {
+            id: "id del player",
+            num: "0 o 1 in base al primo che è entrato"
 
-    rooms.push({id: id, players: 1})
-
-    return id;
-}
-
-
+        }
+    ],
+    game: {
+        turn: "0 o 1 in base a quale player tocca"
+        finish: "true o false se è finita o meno la partita"
+    }
+} */
 
 io.on('connection', socket => {
-    //console.log(rooms)
 
     playerNum++
     io.emit("player-number-change", playerNum)
 
-    let room;
+    let room
+
+    function addPlayerToRoom(num) {
+        rooms[findIndexRoom(room)].players.push({id: socket.id, num})
+    }
 
     function quitRoom() {
         if (room == undefined) return
 
-        rooms[findIndexRoom(room)].players -= 1
+        let index = findIndexRoom(room)
 
-        socket.to(room).emit("room-quit")
+        for (let i = 0; i < rooms[index].players.length; i++)
+            if (rooms[index].players[i].id == socket.id) {
+                rooms[index].players.splice(i, 1)
+                break
+            }
+
+        socket.to(room).emit("room-quit", {canReconnect: !rooms[index].roomClose, room})
 
         socket.leave(room)
 
@@ -62,6 +71,10 @@ io.on('connection', socket => {
     socket.on("create-room", () => {
         room = makeid(5)
 
+        rooms.push({id: room, roomClose: false, players: [], game: {}})
+
+        addPlayerToRoom(0)
+
         socket.join(room)
 
         socket.emit("create-room-response", room)
@@ -76,13 +89,15 @@ io.on('connection', socket => {
         if (findIndexRoom(_room) == undefined)
             return socket.emit("join-room-response", {outcome: false, message: "the room doesn't exist"})
 
-        if (rooms[findIndexRoom(_room)].players != 1) 
+        if (rooms[findIndexRoom(_room)].players.length != 1) 
             return socket.emit("join-room-response", {outcome: false, message: "number of people not accepted"})
 
+        if (rooms[findIndexRoom(_room)].roomClose)
+            return socket.emit("join-room-response", {outcome: false, message: "the game has already started"})
 
         room = _room
 
-        rooms[findIndexRoom(room)].players += 1
+        addPlayerToRoom(1)
 
         socket.join(room)
 
@@ -93,23 +108,65 @@ io.on('connection', socket => {
     socket.on("quit-room", () => quitRoom())
 
     socket.on("disconnect", () => {
-
-        if (room != undefined) {
-            if (rooms[findIndexRoom(room)].players == 1) delateRoom()
-            else if (rooms[findIndexRoom(room)].players == 2) quitRoom()
-        }
+        if (room != undefined)
+            if (rooms[findIndexRoom(room)].players.length == 1) delateRoom()
+            else if (rooms[findIndexRoom(room)].players.length == 2) quitRoom()
 
         playerNum--
         io.emit("player-number-change", playerNum)
     })
 
+    //--- Game ---//
+
+    // socket.on("ready-to-play", () => {
+
+
+    //     socket.emit("join-room-response", {outcome: true})
+    //     socket.to(room).emit("room-ready")
+    // })
+
+
+
+
 })
+
+
+//--- Make ID ---//
+
+const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+function makeid(length) {
+    let id;
+    do {
+        id = ""
+        for (let i = 0; i < length; i++)
+            id += characters.charAt(Math.floor(Math.random() * characters.length));
+    } while (arrayInclude(id));
+
+    return id;
+}
+
+function arrayInclude(id) {
+    for (let i = 0; i < rooms.length; i++)
+        if (rooms[i].id == id) return true
+
+    return false
+}
+
+
+
+//--- Find Index of the Room ---//
 
 function findIndexRoom(room) {
     for (let i = 0; i < rooms.length; i++)
         if (rooms[i].id == room)
             return i
 }
+
+
+function printRoomsArray() {
+    console.clear()
+    console.log(rooms)
+} setInterval(printRoomsArray, 1000);
 
 
 server.listen(process.env.PORT || 3000, () => console.log(`Listening on port ${process.env.PORT || 3000}`))
