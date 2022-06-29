@@ -394,7 +394,7 @@ body {
 
 .boat {
     background-color: rgb(0, 68, 255);
-    z-index: 10;
+    z-index: 5;
     position: absolute;
 }
 
@@ -468,6 +468,21 @@ body {
 
     to {
         margin-right: 1vmin;
+    }
+}
+
+.tickerEvenHorizontal {
+    animation: tickerEvenHorizontal 0.05s linear 0s 15 alternate;
+    /*background-color: rgb(255, 0, 0);*/
+}
+
+@keyframes tickerEvenHorizontal {
+    from {
+        margin-left: 1vmin;
+    }
+
+    to {
+        margin-right: 6vmin;
     }
 }
 

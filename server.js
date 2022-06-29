@@ -1,4 +1,5 @@
 const express = require('express');
+const { Socket } = require('socket.io');
 const { setTimeout } = require('timers/promises');
 const app = express();
 const server = require('http').createServer(app);
@@ -18,6 +19,7 @@ let rooms = []
         {
             id: "id del player",
             num: "0 o 1 in base al primo che è entrato"
+            ready: "true o false"
 
         }
     ],
@@ -71,7 +73,7 @@ io.on('connection', socket => {
     socket.on("create-room", () => {
         room = makeid(5)
 
-        rooms.push({id: room, roomClose: false, players: [], game: {}})
+        rooms.push({id: room, roomClose: false, players: [], game: {started: false, finish: false}})
 
         addPlayerToRoom(0)
 
@@ -118,12 +120,42 @@ io.on('connection', socket => {
 
     //--- Game ---//
 
-    // socket.on("ready-to-play", () => {
+    socket.on("player-ready", () => {
+
+        let indexRoom = findIndexRoom(room)
+        let indexPlayer = findIndexPlayer(room, socket.id)
+
+        rooms[indexRoom].players[indexPlayer].ready = true
+
+        let roomReady = true
+        
+        for (const player of rooms[indexRoom].players)
+            if (!player.ready) roomReady = false
 
 
-    //     socket.emit("join-room-response", {outcome: true})
-    //     socket.to(room).emit("room-ready")
-    // })
+        if (roomReady) {
+            io.to(room).emit("game-start")
+            rooms[indexRoom].game.started = true
+        }
+        else {
+            socket.emit("player-ready-wait")
+
+            socket.to(room).emit("opponent-ready-waiting")
+        }
+
+
+        
+    })
+
+    socket.on("player-not-ready-anymore", () => {
+
+        let indexRoom = findIndexRoom(room)
+        let indexPlayer = findIndexPlayer(room, socket.id)
+
+        rooms[indexRoom].players[indexPlayer].ready = false
+
+        socket.to(room).emit("opponent-not-ready-anymore")
+    })
 
 
 
@@ -159,6 +191,14 @@ function arrayInclude(id) {
 function findIndexRoom(room) {
     for (let i = 0; i < rooms.length; i++)
         if (rooms[i].id == room)
+            return i
+}
+
+function findIndexPlayer(room, id) {
+    let roomIndex = findIndexRoom(room)
+
+    for (let i = 0; i < rooms[roomIndex].players.length; i++)
+        if (rooms[roomIndex].players[i].id == id)
             return i
 }
 

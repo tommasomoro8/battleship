@@ -9,19 +9,23 @@ let indexDivTaken
 let whereTaken
 let over = false
 
-let boatsGrid = []
-for (let i = 0; i < 8; i++) {
-    boatsGrid[i] = []
-    for (let j = 0; j < 8; j++)
-        boatsGrid[i][j] = false;
-}
+let boatsGrid
+
+function boatsGridReset() {
+    boatsGrid = []
+    for (let i = 0; i < 8; i++) {
+        boatsGrid[i] = []
+        for (let j = 0; j < 8; j++)
+            boatsGrid[i][j] = false;
+    }
+} boatsGridReset()
 
 
 for (let i = 0; i < _boats.length; i++) {
     boats.push({div: _boats[i], length: (i < 2) ? i + 2 : i + 1, vertical: true, position: [], reSaveBoatPosition: {}})
     boats[i].div.addEventListener("click", () => {
-        
-        if (boats[i].position.length == 0) return
+
+        if (boats[i].position.length == 0 || !eval(boats[i].div.getAttribute('draggable'))) return
         
         boats[i].vertical = !boats[i].vertical
 
@@ -136,8 +140,10 @@ function checkIllegality(positions, indexDiv) {
 
 
 function showCannotTurn(boatIndex) {
-    boats[boatIndex].div.classList.add('ticker')
-    setTimeout(() => boats[boatIndex].div.classList.remove('ticker'), 600);
+    const className = (boats[boatIndex].length % 2 == 0 && boats[boatIndex].vertical) ? "tickerEvenHorizontal" : "ticker"
+console.log(className)
+    boats[boatIndex].div.classList.add(className)
+    setTimeout(() => boats[boatIndex].div.classList.remove(className), 600);
 }
 
 
@@ -189,6 +195,19 @@ function saveBoatPosition(i, j, boatIndex, centralPos, save = true) {
 
 }
 
+function resetBoats() {
+    boatsGridReset()
+
+    for (let i = 0; i < boats.length; i++) {
+        document.getElementById(`boat-holder-${i}`).appendChild(boats[i].div)
+
+        boats[i].div.classList.remove('horizontal')
+        boats[i].vertical = true
+        boats[i].position = []
+        boats[i].reSaveBoatPosition = {}
+    }
+}
+
 
 function checkPlaceAllBoats() {
     for (const boat of boats)
@@ -196,4 +215,10 @@ function checkPlaceAllBoats() {
             return false
 
     return true
+}
+
+
+function blockBoats(block) {
+    for (const boat of boats)
+        boat.div.setAttribute('draggable', !block);
 }

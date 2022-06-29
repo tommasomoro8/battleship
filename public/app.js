@@ -152,10 +152,11 @@ socket.on("join-room-response", response => {
 document.getElementById("boats-container-quit").addEventListener("click", () => {
     socket.emit("quit-room")
     changeScreen("starting-page-container")
+    resetBoats()
 })
 
 document.getElementById("boats-container-clear").addEventListener("click", () => {
-
+    resetBoats()
 })
 
 document.getElementById("boats-container-done").addEventListener("click", () => {
@@ -164,15 +165,41 @@ document.getElementById("boats-container-done").addEventListener("click", () => 
         return
     }
 
-    openModal(true, "place-boats-waiting-container") ///
+    blockBoats(true)
 
+    socket.emit("player-ready")
+})
+
+socket.on("opponent-ready-waiting", () => {
+    console.log("il tuo avversario è pronto!")
+})
+
+socket.on("player-ready-wait", () => {
+    openModal(true, "place-boats-waiting-container")
+})
+
+socket.on("opponent-not-ready-anymore", () => {
+    console.log("il tuo avversario non è più pronto")
+})
+
+
+socket.on("game-start", () => {
+    openModal(false)
+    alert("il gioco è cominciato")
 })
 
 //Attesa posizionamento navi
 document.getElementById("place-boats-waiting-back").addEventListener("click", () => {
+    blockBoats(false)
     openModal(false)
-
+    socket.emit("player-not-ready-anymore")
 })
+
+
+
+
+
+
 
 socket.on("room-quit", details => {
     if (details.canReconnect)
@@ -186,4 +213,5 @@ document.getElementById("quit-warn-back").addEventListener("click", () => {
     openModal(false)
     changeScreen("starting-page-container")
     document.getElementById("quit-warn-reconnect").innerText = ""
+    resetBoats()
 })
