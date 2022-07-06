@@ -22,7 +22,7 @@ function boatsGridReset() {
 
 
 for (let i = 0; i < _boats.length; i++) {
-    boats.push({div: _boats[i], length: (i < 2) ? i + 2 : i + 1, vertical: true, position: [], reSaveBoatPosition: {}})
+    boats.push({div: _boats[i], length: (i < 2) ? i + 2 : i + 1, vertical: true, position: [], reSaveBoatPosition: {}, hit: 0, sunk: false})
     boats[i].div.addEventListener("click", () => {
 
         if (boats[i].position.length == 0 || !eval(boats[i].div.getAttribute('draggable'))) return
@@ -74,15 +74,16 @@ for (let i = 0; i < boats.length; i++) {
 let illegalPos = false
 
 
-defensiveGrid.forEach((row, i) => row.forEach((box, j) => {
+defGrid.forEach((row, i) => row.forEach((box, j) => {
+    
     function dragoverEventListener(e) {
         e.preventDefault()
         over = true
     }
 
-    box.addEventListener("dragover", dragoverEventListener)
+    box.div.addEventListener("dragover", dragoverEventListener)
     
-    box.addEventListener("dragenter", (e) => setTimeout(() => {
+    box.div.addEventListener("dragenter", (e) => setTimeout(() => {
         e.preventDefault()
 
         over = true
@@ -94,19 +95,19 @@ defensiveGrid.forEach((row, i) => row.forEach((box, j) => {
         illegalPos = checkIllegality(positions, indexDivTaken)
             
         if (illegalPos)
-            box.removeEventListener("dragover", dragoverEventListener)
+            box.div.removeEventListener("dragover", dragoverEventListener)
     }, 1))
 
 
-    box.addEventListener("dragleave", () => {
+    box.div.addEventListener("dragleave", () => {
         over = false
-        box.addEventListener("dragover", dragoverEventListener)
+        box.div.addEventListener("dragover", dragoverEventListener)
     })
 
-    box.addEventListener("drop", () => {
+    box.div.addEventListener("drop", () => {
         let centralPosition = findCentralPosition(i, j)
     
-        defensiveGrid[centralPosition.i][centralPosition.j].append(divTaken)
+        defGrid[centralPosition.i][centralPosition.j].div.append(divTaken)
         saveBoatPosition(centralPosition.i, centralPosition.j, indexDivTaken, centralPosition.centralPos)
     
         divTaken.style.display = "flex"
@@ -141,7 +142,7 @@ function checkIllegality(positions, indexDiv) {
 
 function showCannotTurn(boatIndex) {
     const className = (boats[boatIndex].length % 2 == 0 && boats[boatIndex].vertical) ? "tickerEvenHorizontal" : "ticker"
-console.log(className)
+    
     boats[boatIndex].div.classList.add(className)
     setTimeout(() => boats[boatIndex].div.classList.remove(className), 600);
 }
@@ -205,6 +206,8 @@ function resetBoats() {
         boats[i].vertical = true
         boats[i].position = []
         boats[i].reSaveBoatPosition = {}
+        boats[i].hit = 0
+        boats[i].sunk = false
     }
 }
 

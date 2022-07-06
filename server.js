@@ -9,7 +9,10 @@ app.use(express.static('public'))
 app.get('/', (req, res) => res.sendFile('public'))
 
 
-let playerNum = 0;
+//---------------//
+
+let playerNum = 0
+let idLength = 1
 
 let rooms = []
 
@@ -36,8 +39,8 @@ io.on('connection', socket => {
 
     let room
 
-    function addPlayerToRoom(num) {
-        rooms[findIndexRoom(room)].players.push({id: socket.id, num})
+    function addPlayerToRoom() {
+        rooms[findIndexRoom(room)].players.push({id: socket.id})
     }
 
     function quitRoom() {
@@ -71,18 +74,21 @@ io.on('connection', socket => {
     }
 
     socket.on("create-room", () => {
-        room = makeid(5)
+        while (calcSaturation(idLength) >= 50) idLength++
+        while (idLength > 1 && calcSaturation(idLength - 1) < 50) idLength--
+
+        room = makeid(idLength)
 
         rooms.push({id: room, roomClose: false, players: [], game: {started: false, finish: false}})
 
-        addPlayerToRoom(0)
+        addPlayerToRoom()
 
         socket.join(room)
 
         socket.emit("create-room-response", room)
     })
 
-    socket.on("delate-room", () => delateRoom())
+    socket.on("delate-room", delateRoom)
 
     socket.on("join-room", _room => {
         if (room != undefined)
@@ -99,7 +105,7 @@ io.on('connection', socket => {
 
         room = _room
 
-        addPlayerToRoom(1)
+        addPlayerToRoom()
 
         socket.join(room)
 
@@ -107,7 +113,7 @@ io.on('connection', socket => {
         socket.to(room).emit("room-ready")
     })
 
-    socket.on("quit-room", () => quitRoom())
+    socket.on("quit-room", quitRoom)
 
     socket.on("disconnect", () => {
         if (room != undefined)
@@ -121,7 +127,6 @@ io.on('connection', socket => {
     //--- Game ---//
 
     socket.on("player-ready", () => {
-
         let indexRoom = findIndexRoom(room)
         let indexPlayer = findIndexPlayer(room, socket.id)
 
@@ -132,23 +137,19 @@ io.on('connection', socket => {
         for (const player of rooms[indexRoom].players)
             if (!player.ready) roomReady = false
 
-
         if (roomReady) {
             io.to(room).emit("game-start")
             rooms[indexRoom].game.started = true
+
+            gameStart()
         }
         else {
             socket.emit("player-ready-wait")
-
             socket.to(room).emit("opponent-ready-waiting")
         }
-
-
-        
     })
 
     socket.on("player-not-ready-anymore", () => {
-
         let indexRoom = findIndexRoom(room)
         let indexPlayer = findIndexPlayer(room, socket.id)
 
@@ -157,9 +158,35 @@ io.on('connection', socket => {
         socket.to(room).emit("opponent-not-ready-anymore")
     })
 
+    function gameStart() {
+        rooms[findIndexRoom(room)].game.turn = {socket: rooms[findIndexRoom(room)].players[0].id, shots: 3}
+
+        io.to(room).emit("turn-change", rooms[findIndexRoom(room)].game.turn)
+    }
+
+    function turnManager() {
+        if (rooms[findIndexRoom(room)].game.turn.shots == 1) 
+            rooms[findIndexRoom(room)].game.turn = {socket: rooms[findIndexRoom(room)].players[(findIndexPlayer(room, socket.id) == 0) ? 1 : 0].id, shots: 3}
+        else
+            rooms[findIndexRoom(room)].game.turn.shots--
+        
+
+        io.to(room).emit("turn-change", rooms[findIndexRoom(room)].game.turn)
+    }
+
+    socket.on("shoot", where => 
+        socket.to(room).emit("shoot-at", where)
+    )
+
+    socket.on("shoot-at-response", (hit, sunk) =>
+        socket.to(room).emit("shoot-response", hit, sunk)
+    )
+
+    socket.on("turn-manager", turnManager)
 
 
 
+    
 })
 
 
@@ -186,7 +213,7 @@ function arrayInclude(id) {
 
 
 
-//--- Find Index of the Room ---//
+//--- Find Index of the Room or the Player ---//
 
 function findIndexRoom(room) {
     for (let i = 0; i < rooms.length; i++)
@@ -203,9 +230,20 @@ function findIndexPlayer(room, id) {
 }
 
 
+//--- Calculate saturation ---//
+
+function calcSaturation(_idLength) {
+    return playerNum / Math.pow(characters.length, _idLength) * 100
+}
+
+
+//---------------//
+
 function printRoomsArray() {
     console.clear()
-    console.log(rooms)
+    //console.log(rooms)
+    if (rooms[0])
+        console.log(rooms[0])
 } setInterval(printRoomsArray, 1000);
 
 
